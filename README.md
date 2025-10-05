@@ -68,7 +68,7 @@ npm install
 npx prisma migrate dev --name init
 
 # Start backend
-npm run dev
+node server.js
 ```
 
 ### Frontend
