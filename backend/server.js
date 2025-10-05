@@ -192,5 +192,5 @@ app.delete("/tasks/:id", authenticate, async (req, res) => {
   }
 });
 
-// -------------------- Start Server --------------------
+
 app.listen(4000, () => console.log("🚀 Server running on port 4000"));
