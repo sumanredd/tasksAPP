@@ -1,70 +1,117 @@
-# Getting Started with Create React App
+# Task Management App – Backend & Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
+A scalable Task Management application with **authentication**, **role-based access**, and **CRUD operations** on tasks. Built with **Node.js**, **Express**, **Prisma**, **PostgreSQL**, and **React.js**.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+### Backend
+- **User Registration & Login** with JWT authentication
+- **Role-Based Access**
+  - `USER`: Can create, edit, and delete their own tasks
+  - `ADMIN`: Can edit/delete all tasks
+- **CRUD APIs for Tasks**
+- Task ownership and “edited by admin” tracking
+- **Password Hashing** (bcrypt)
+- **JWT Token Handling** (stored in HTTP-only cookies)
+- **Error Handling** with proper status codes
+- **Input Validation** (username, email, password, confirm password)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Frontend
+- Built with **React.js**
+- Register & login forms with **validation**
+- Protected Dashboard (requires JWT)
+- Create, edit, delete tasks
+- Users see their own edit/delete buttons; admin sees all
+- “Edited by admin” info displayed when admin modifies tasks
+- Success & error messages from API responses
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## API Documentation
+- **Postman Collection** included in `/docs/TaskManagement.postman_collection.json`
+- Base URL: `http://localhost:4000`
+- Example endpoints:
+  - `POST /register` – Register a new user
+  - `POST /login` – Login
+  - `GET /tasks` – Get all tasks
+  - `POST /tasks` – Create a new task
+  - `PUT /tasks/:id` – Edit a task
+  - `DELETE /tasks/:id` – Delete a task
+  - `GET /me` – Get current logged-in user
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## Scalability Notes
+- **Modular Project Structure** – easy to extend with new modules or APIs
+- **Role-based access** simplifies permission management
+- **Database** – PostgreSQL supports large datasets and can scale vertically/horizontally
+- **Optional Enhancements**
+  - **Caching** (Redis) for frequently accessed endpoints like `/tasks`
+  - **Logging & Monitoring** (Winston, Morgan)
+  - **Docker Deployment** for consistent environments
+  - Microservices architecture for task management, user management, and notifications
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Installation & Setup
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Backend
+```bash
+git clone <repo-url>
+cd backend
+npm install
 
-### `npm run eject`
+# Run Prisma migration
+npx prisma migrate dev --name init
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+# Start backend
+npm run dev
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Frontend
+```bash
+cd frontend
+npm install
+npm start
+```
+Visit **http://localhost:3000** for the frontend dashboard.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Default Admin User
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+***For testing purposes, you can create a default admin:***
+Prisma Script
+```javascript
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
-## Learn More
+const prisma = new PrismaClient();
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+async function main() {
+  const hashedPassword = await bcrypt.hash("Admin@123", 10);
+  await prisma.user.upsert({
+    where: { username: "admin" },
+    update: {},
+    create: {
+      username: "admin",
+      email: "admin@example.com",
+      password: hashedPassword,
+      role: "ADMIN",
+    },
+  });
+  console.log("Admin user created/exists");
+}
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+main()
+  .catch((e) => console.error(e))
+  .finally(() => prisma.$disconnect());
+```
 
-### Code Splitting
+```bash
+Username: admin
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Password: Admin@123
+```
+**Admin can edit/delete all tasks. Users will see “edited by admin” if admin modifies a task.**

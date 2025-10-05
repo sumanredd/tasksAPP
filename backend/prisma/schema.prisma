@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+   role      String   @default("USER")
+  tasks     Task[] // <-- This is the opposite relation
+  createdAt DateTime @default(now())
+}
+
+model Task {
+  id            Int      @id @default(autoincrement())
+  title         String
+  user          User     @relation(fields: [userId], references: [id])
+  userId        Int
+  editedByAdmin Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
