@@ -112,6 +112,6 @@ main()
 ```bash
 Username: admin
 
-Password: Admin@123
+Password: admin@9999
 ```
 **Admin can edit/delete all tasks. Users will see “edited by admin” if admin modifies a task.**
